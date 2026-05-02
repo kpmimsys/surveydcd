@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Alumni DCD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===== TOKENS ===== */
+:root {
+  --bg: #0c0c0e;
+  --bg2: #111114;
+  --bg3: #18181c;
+  --bg4: #1f1f24;
+  --line: rgba(255,255,255,0.06);
+  --line2: rgba(255,255,255,0.1);
+  --red: #e8192c;
+  --red-dim: rgba(232,25,44,0.1);
+  --red-line: rgba(232,25,44,0.25);
+  --txt: #e2e2e6;
+  --txt2: #888892;
+  --txt3: #4a4a55;
+  --green: #22c55e;
+  --white: #fff;
+  --r: 10px;
+  --r-sm: 6px;
+  --tr: 0.2s ease;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* LIGHT MODE */
+body.light {
+  --bg: #f5f5f7;
+  --bg2: #ffffff;
+  --bg3: #f0f0f3;
+  --bg4: #e8e8ed;
+  --line: rgba(0,0,0,0.07);
+  --line2: rgba(0,0,0,0.12);
+  --txt: #1a1a1e;
+  --txt2: #666670;
+  --txt3: #aaaaae;
+  --red-dim: rgba(200,10,25,0.07);
+  --red-line: rgba(200,10,25,0.2);
+  --red: #c8000f;
+  --green: #16a34a;
+}
+
+/* ===== RESET ===== */
+*,*::before,*::after { margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent; }
+html { scroll-behavior:smooth;overscroll-behavior:none; }
+body {
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--txt);
+  line-height:1.5;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--red);border-radius:2px; }
+
+/* ===== TOPBAR ===== */
+#topbar {
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  height:52px;
+  background:rgba(12,12,14,0.9);
+  backdrop-filter:blur(20px) saturate(1.8);
+  -webkit-backdrop-filter:blur(20px) saturate(1.8);
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+  transition:border-color var(--tr);
+}
+body.light #topbar { background:rgba(245,245,247,0.92); }
+#topbar.scrolled { border-bottom-color:var(--line2); }
+
+.tb-brand {
+  display:flex;align-items:center;gap:10px;
+}
+.tb-dot {
+  width:8px;height:8px;border-radius:50%;
+  background:var(--red);
+  box-shadow:0 0 8px var(--red);
+  animation:pulse-r 2s ease-in-out infinite;
+}
+@keyframes pulse-r { 0%,100%{box-shadow:0 0 4px var(--red);}50%{box-shadow:0 0 12px var(--red);} }
+.tb-title {
+  font-size:14px;font-weight:700;letter-spacing:0.3px;
+  color:var(--txt);
+}
+.tb-right { display:flex;align-items:center;gap:8px; }
+
+/* ===== MODE BUTTON ===== */
+/* Pulsing border + icon glow to signal it's tappable */
+@keyframes frame-blink-dark {
+  0%,100% {
+    border-color: rgba(140,160,255,0.2);
+    box-shadow: 0 0 0px rgba(140,160,255,0), inset 0 0 0px rgba(140,160,255,0);
+    background: #18181c;
+  }
+  50% {
+    border-color: rgba(140,160,255,0.75);
+    box-shadow: 0 0 10px rgba(140,160,255,0.35), inset 0 0 8px rgba(140,160,255,0.1);
+    background: #1e1e2e;
+  }
+}
+@keyframes frame-blink-light {
+  0%,100% {
+    border-color: rgba(255,184,0,0.2);
+    box-shadow: 0 0 0px rgba(255,184,0,0), inset 0 0 0px rgba(255,184,0,0);
+    background: #f0f0f3;
+  }
+  50% {
+    border-color: rgba(255,184,0,0.8);
+    box-shadow: 0 0 10px rgba(255,184,0,0.3), inset 0 0 8px rgba(255,184,0,0.08);
+    background: #fffaf0;
+  }
+}
+@keyframes icon-blink-dark {
+  0%,100% { filter:drop-shadow(0 0 0px rgba(140,160,255,0)); color:#6878cc; }
+  50%      { filter:drop-shadow(0 0 8px rgba(140,160,255,1)); color:#c8d4ff; }
+}
+@keyframes icon-blink-light {
+  0%,100% { filter:drop-shadow(0 0 0px rgba(255,184,0,0)); color:#c07000; }
+  50%      { filter:drop-shadow(0 0 8px rgba(255,184,0,1)); color:#ffb800; }
+}
+
+.mode-btn {
+  width:34px;height:34px;
+  border:1px solid var(--line2);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:15px;position:relative;
+  transition:transform var(--tr);
+}
+.mode-btn:active { transform:scale(0.90); }
+body:not(.light) .mode-btn {
+  animation: frame-blink-dark 1.8s ease-in-out infinite;
+}
+body.light .mode-btn {
+  animation: frame-blink-light 1.8s ease-in-out infinite;
+}
+body:not(.light) .mode-btn svg { animation:icon-blink-dark 1.8s ease-in-out infinite; }
+body.light .mode-btn svg { animation:icon-blink-light 1.8s ease-in-out infinite; }
+
+/* ===== DESKTOP BUTTON ===== */
+@keyframes frame-blink-desktop {
+  0%,100% {
+    border-color: rgba(255,255,255,0.1);
+    box-shadow: 0 0 0px rgba(100,210,255,0);
+    color: #666670;
+    background: #18181c;
+  }
+  50% {
+    border-color: rgba(100,210,255,0.6);
+    box-shadow: 0 0 10px rgba(100,210,255,0.25), inset 0 0 8px rgba(100,210,255,0.07);
+    color: #7ed4f5;
+    background: #101820;
+  }
+}
+@keyframes frame-blink-desktop-light {
+  0%,100% {
+    border-color: rgba(0,0,0,0.12);
+    box-shadow: 0 0 0px rgba(0,120,200,0);
+    color: #666670;
+    background: #f0f0f3;
+  }
+  50% {
+    border-color: rgba(0,120,200,0.45);
+    box-shadow: 0 0 10px rgba(0,120,200,0.2), inset 0 0 8px rgba(0,120,200,0.05);
+    color: #007cd0;
+    background: #f0f6ff;
+  }
+}
+@keyframes icon-blink-desktop {
+  0%,100% { filter:drop-shadow(0 0 0px rgba(100,210,255,0)); }
+  50%      { filter:drop-shadow(0 0 6px rgba(100,210,255,0.9)); }
+}
+@keyframes icon-blink-desktop-light {
+  0%,100% { filter:drop-shadow(0 0 0px rgba(0,120,200,0)); }
+  50%      { filter:drop-shadow(0 0 6px rgba(0,120,200,0.8)); }
+}
+
+.desktop-btn {
+  display:flex;align-items:center;gap:5px;
+  border:1px solid var(--line2);
+  border-radius:9px;padding:0 10px;height:34px;
+  font-family:'DM Mono',monospace;font-size:10px;font-weight:500;
+  letter-spacing:0.3px;cursor:pointer;
+  text-decoration:none;white-space:nowrap;
+  transition:transform var(--tr);
+}
+.desktop-btn:active { transform:scale(0.93); }
+body:not(.light) .desktop-btn {
+  animation: frame-blink-desktop 2.2s ease-in-out infinite;
+}
+body.light .desktop-btn {
+  animation: frame-blink-desktop-light 2.2s ease-in-out infinite;
+}
+body:not(.light) .desktop-btn svg { animation: icon-blink-desktop 2.2s ease-in-out infinite; }
+body.light .desktop-btn svg { animation: icon-blink-desktop-light 2.2s ease-in-out infinite; }
+
+/* Sync button */
+.sync-btn {
+  display:flex;align-items:center;gap:5px;
+  background:var(--red);color:#fff;border:none;
+  border-radius:8px;padding:0 12px;height:32px;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:0.3px;cursor:pointer;transition:all var(--tr);
+}
+.sync-btn:active { transform:scale(0.96);background:#c0101f; }
+.sync-btn.loading { opacity:0.6;pointer-events:none; }
+.sync-btn svg { transition:transform var(--tr); }
+.sync-btn.loading svg { animation:spin 0.6s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg);} }
+
+/* ===== HERO (compact) ===== */
+#hero {
+  margin-top:52px;
+  padding:24px 16px 20px;
+  position:relative;
+  border-bottom:1px solid var(--line);
+  overflow:hidden;
+}
+.hero-noise {
+  position:absolute;inset:0;pointer-events:none;opacity:0.03;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size:200px;
+}
+.hero-tag {
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'DM Mono',monospace;
+  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--red);margin-bottom:10px;
+}
+.hero-tag::before { content:'';width:16px;height:1px;background:var(--red); }
+.hero-h1 {
+  font-size:32px;font-weight:700;line-height:1.05;
+  letter-spacing:-0.5px;color:var(--txt);
+  margin-bottom:10px;
+}
+.hero-h1 em { color:var(--red);font-style:normal; }
+.hero-meta {
+  font-size:12px;color:var(--txt2);line-height:1.6;
+  margin-bottom:16px;max-width:320px;
+}
+.hero-status {
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--bg3);border:1px solid var(--line2);
+  border-radius:8px;padding:7px 12px;
+  font-size:12px;font-weight:500;color:var(--txt2);
+  transition:all 0.3s;
+}
+.hero-status.ok { border-color:rgba(34,197,94,0.3);color:var(--green);background:rgba(34,197,94,0.05); }
+.hero-status.err { border-color:var(--red-line);color:var(--red);background:var(--red-dim); }
+.spin-sm { width:11px;height:11px;border:1.5px solid rgba(255,255,255,0.12);border-top-color:var(--red);border-radius:50%;animation:spin 0.6s linear infinite;flex-shrink:0; }
+
+/* ===== SYNC BAR ===== */
+#syncBar {
+  position:sticky;top:52px;z-index:90;
+  background:var(--bg2);
+  border-bottom:1px solid var(--line);
+  padding:8px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;
+  font-size:11px;color:var(--txt2);
+}
+.sb-left { display:flex;align-items:center;gap:7px;flex:1;min-width:0; }
+.sb-dot { width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse-g 2s infinite; }
+.sb-dot.err { background:var(--red);animation:none; }
+.sb-dot.syncing { background:var(--red);border-radius:2px;animation:spin 0.5s linear infinite; }
+@keyframes pulse-g { 0%,100%{opacity:1;}50%{opacity:0.4;} }
+.sb-txt { font-size:11px;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.sb-num { color:var(--red);font-weight:700; }
+.sb-actions { display:flex;gap:6px;flex-shrink:0; }
+.sb-btn {
+  font-family:'DM Mono',monospace;font-size:10px;font-weight:500;
+  letter-spacing:0.5px;background:var(--bg3);border:1px solid var(--line2);
+  color:var(--txt2);border-radius:6px;padding:4px 10px;cursor:pointer;
+  transition:all var(--tr);
+}
+.sb-btn:active { background:var(--red);color:#fff;border-color:var(--red); }
+.sb-progress { position:absolute;bottom:0;left:0;right:0;height:1.5px;background:var(--line); }
+.sb-fill { height:100%;background:var(--red);transition:width 1s linear; }
+
+/* ===== MAIN ===== */
+#main { padding:0 0 calc(80px + var(--safe-bottom)); }
+
+/* ===== SECTION HEADER ===== */
+.sec-hd {
+  padding:20px 16px 12px;
+  display:flex;align-items:center;gap:10px;
+}
+.sec-num {
+  font-family:'DM Mono',monospace;font-size:10px;color:var(--red);
+  background:var(--red-dim);border:1px solid var(--red-line);
+  border-radius:4px;padding:2px 7px;letter-spacing:0.5px;
+}
+.sec-title {
+  font-size:12px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;color:var(--txt2);
+}
+.sec-hd::after { content:'';flex:1;height:1px;background:var(--line); }
+
+/* ===== STAT CARDS (2x3 grid) ===== */
+.stats-wrap { padding:0 16px;margin-bottom:4px; }
+.stats-grid {
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+}
+.stat-card {
+  background:var(--bg2);border:1px solid var(--line);
+  border-radius:var(--r);padding:14px 14px 12px;
+  position:relative;overflow:hidden;
+  transition:border-color var(--tr);
+}
+.stat-card.hi {
+  background:var(--red);border-color:transparent;
+  grid-column:span 2;
+  display:flex;align-items:center;gap:16px;
+  padding:16px 18px;
+}
+.stat-card:not(.hi):active { border-color:var(--red-line); }
+.s-icon { font-size:18px;margin-bottom:8px;display:block; }
+.stat-card.hi .s-icon { margin-bottom:0;font-size:28px; }
+.s-label {
+  font-size:10px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;color:var(--txt2);margin-bottom:4px;
+}
+.stat-card.hi .s-label { color:rgba(255,255,255,0.65); }
+.s-val {
+  font-family:'DM Mono',monospace;font-size:32px;font-weight:500;
+  color:var(--red);line-height:1;margin-bottom:2px;
+}
+.stat-card.hi .s-val { color:#fff;font-size:40px; }
+.s-sub { font-size:10px;color:var(--txt3); }
+.stat-card.hi .s-sub { color:rgba(255,255,255,0.5); }
+.s-corner {
+  position:absolute;top:0;right:0;
+  width:0;height:0;border-style:solid;
+  border-width:0 20px 20px 0;
+  border-color:transparent rgba(255,255,255,0.06) transparent transparent;
+}
+.stat-card.hi .s-corner { border-color:transparent rgba(0,0,0,0.1) transparent transparent; }
+
+/* ===== CHART CARDS ===== */
+.charts-wrap { padding:0 16px;margin-bottom:4px; }
+.chart-card {
+  background:var(--bg2);border:1px solid var(--line);
+  border-radius:var(--r);padding:16px;margin-bottom:8px;
+}
+.chart-hd {
+  display:flex;align-items:center;gap:8px;margin-bottom:14px;
+}
+.chart-hd-bar { width:3px;height:14px;background:var(--red);border-radius:2px; }
+.chart-hd-title {
+  font-size:12px;font-weight:700;letter-spacing:0.5px;
+  text-transform:uppercase;color:var(--txt);
+}
+
+/* Bar chart */
+.bar-item {
+  display:grid;grid-template-columns:44px 1fr 28px;
+  gap:8px;align-items:center;margin-bottom:8px;
+}
+.bar-label { font-family:'DM Mono',monospace;font-size:11px;color:var(--txt2);text-align:right; }
+.bar-track { background:var(--bg3);border-radius:2px;height:6px;overflow:hidden; }
+.bar-fill { height:100%;border-radius:2px;background:var(--red);transition:width 0.9s cubic-bezier(.4,0,.2,1); }
+.bar-count { font-family:'DM Mono',monospace;font-size:12px;color:var(--red);text-align:right; }
+
+/* Status bars */
+.status-row { display:flex;align-items:center;gap:8px;margin-bottom:8px; }
+.status-name {
+  font-size:11px;color:var(--txt2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  width:100px;flex-shrink:0;
+}
+.status-bar-wrap { flex:1; }
+.status-bar-track { background:var(--bg3);border-radius:2px;height:5px;overflow:hidden; }
+.status-bar-fill { height:100%;border-radius:2px;transition:width 0.9s; }
+.status-cnt { font-family:'DM Mono',monospace;font-size:11px;color:var(--red);flex-shrink:0;width:20px;text-align:right; }
+
+/* ===== YEAR TABS (horizontal scroll) ===== */
+.tabs-wrap {
+  padding:0 16px 12px;
+  display:flex;gap:6px;overflow-x:auto;
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+.tabs-wrap::-webkit-scrollbar { display:none; }
+.ytab {
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  background:var(--bg2);border:1px solid var(--line2);
+  border-radius:8px;padding:7px 12px;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
+  color:var(--txt2);cursor:pointer;transition:all var(--tr);
+  white-space:nowrap;flex-shrink:0;
+}
+.ytab.active { background:var(--red);border-color:transparent;color:#fff; }
+.ytab:not(.active):active { border-color:var(--red-line);color:var(--red); }
+.tab-count { font-family:'DM Mono',monospace;font-size:9px;opacity:0.65;margin-top:1px; }
+
+/* ===== SEARCH ===== */
+.search-wrap {
+  padding:0 16px 12px;display:flex;gap:8px;align-items:center;
+}
+.search-field {
+  flex:1;display:flex;align-items:center;gap:8px;
+  background:var(--bg2);border:1px solid var(--line2);
+  border-radius:10px;padding:0 12px;height:40px;
+  transition:border-color var(--tr);
+}
+.search-field:focus-within { border-color:var(--red-line); }
+.search-field svg { flex-shrink:0;color:var(--txt3); }
+.search-field input {
+  flex:1;background:transparent;border:none;outline:none;
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--txt);
+}
+.search-field input::placeholder { color:var(--txt3); }
+.btn-reset {
+  background:var(--red-dim);border:1px solid var(--red-line);
+  color:var(--red);border-radius:8px;padding:0 12px;height:40px;
+  font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;
+  transition:all var(--tr);display:flex;align-items:center;gap:5px;
+  white-space:nowrap;
+}
+.btn-reset:active { background:var(--red);color:#fff; }
+.rec-count {
+  padding:0 16px 10px;
+  font-family:'DM Mono',monospace;font-size:10px;
+  color:var(--txt3);letter-spacing:0.5px;
+}
+
+/* ===== CARDS LIST ===== */
+.cards-list { padding:0 16px;display:flex;flex-direction:column;gap:8px; }
+
+.alumni-card {
+  background:var(--bg2);border:1px solid var(--line);
+  border-radius:var(--r);overflow:hidden;
+  cursor:pointer;transition:all var(--tr);
+  animation:fadeUp 0.3s ease both;
+  position:relative;
+}
+.alumni-card::before {
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:2px;background:var(--red);
+  transform:scaleY(0);transform-origin:bottom;
+  transition:transform var(--tr);
+}
+.alumni-card:active { border-color:var(--red-line);background:var(--bg3); }
+.alumni-card:active::before { transform:scaleY(1); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);} }
+
+.card-top {
+  display:flex;align-items:flex-start;gap:10px;
+  padding:13px 14px 11px;
+  border-bottom:1px solid var(--line);
+}
+.card-av {
+  width:38px;height:38px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:13px;font-weight:500;
+  color:#fff;letter-spacing:0.5px;
+}
+.card-info { flex:1;min-width:0; }
+.card-name {
+  font-size:14px;font-weight:600;color:var(--txt);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:2px;
+}
+.card-job { font-size:11px;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.card-yr {
+  background:var(--red-dim);border:1px solid var(--red-line);
+  color:var(--red);border-radius:5px;padding:3px 8px;
+  font-family:'DM Mono',monospace;font-size:11px;flex-shrink:0;
+}
+
+.card-mid {
+  padding:10px 14px;
+  display:flex;gap:16px;
+  border-bottom:1px solid var(--line);
+}
+.card-field { flex:1;min-width:0; }
+.card-key {
+  font-family:'DM Mono',monospace;font-size:9px;font-weight:500;
+  letter-spacing:1px;text-transform:uppercase;
+  color:var(--txt3);margin-bottom:3px;
+}
+.card-val { font-size:12px;color:var(--txt);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.card-val.income { color:var(--green);font-weight:600; }
+.card-val.no-income { color:var(--txt3);font-style:italic;font-size:11px; }
+
+.card-bot {
+  padding:9px 14px;display:flex;align-items:center;justify-content:space-between;
+}
+.peo-wrap { display:flex;align-items:center;gap:6px; }
+.peo-lbl { font-family:'DM Mono',monospace;font-size:9px;color:var(--txt3);letter-spacing:0.5px; }
+.peo-score { font-family:'DM Mono',monospace;font-size:15px;color:var(--red); }
+.card-arrow { color:var(--txt3);font-size:16px;transition:color var(--tr); }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,0.75);
+  backdrop-filter:blur(8px);
+  display:none;align-items:flex-end;justify-content:center;
+  padding:0;
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+  background:var(--bg2);
+  width:100%;max-width:640px;
+  border-radius:18px 18px 0 0;
+  max-height:90vh;display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+  animation:slideUp 0.3s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes slideUp { from{transform:translateY(100%);}to{transform:translateY(0);} }
+.modal-handle {
+  width:36px;height:4px;background:var(--line2);
+  border-radius:2px;margin:10px auto 0;flex-shrink:0;
+}
+.modal-header {
+  padding:16px 18px 14px;
+  display:flex;gap:12px;align-items:flex-start;
+  border-bottom:1px solid var(--line);
+  flex-shrink:0;
+}
+.modal-av {
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:15px;font-weight:500;
+  color:#fff;flex-shrink:0;letter-spacing:0.5px;
+}
+.modal-info { flex:1;min-width:0; }
+.modal-name { font-size:16px;font-weight:700;color:var(--txt);margin-bottom:2px; }
+.modal-sub { font-size:11px;color:var(--txt2); }
+.modal-close {
+  width:30px;height:30px;background:var(--bg3);
+  border:1px solid var(--line2);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--txt2);flex-shrink:0;
+  transition:all var(--tr);
+}
+.modal-close:active { background:var(--red);color:#fff;border-color:var(--red); }
+.modal-body { overflow-y:auto;flex:1;padding:16px 18px calc(16px + var(--safe-bottom)); }
+
+.modal-section { margin-bottom:20px; }
+.modal-section-title {
+  font-family:'DM Mono',monospace;font-size:10px;font-weight:500;
+  letter-spacing:1.5px;text-transform:uppercase;color:var(--red);
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;
+}
+.modal-section-title::after { content:'';flex:1;height:1px;background:var(--red-line);opacity:0.5; }
+
+.info-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.info-item {
+  background:var(--bg3);border:1px solid var(--line);
+  border-radius:8px;padding:10px 12px;
+}
+.info-item.full { grid-column:1/-1; }
+.info-label { font-family:'DM Mono',monospace;font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);margin-bottom:4px; }
+.info-value { font-size:13px;color:var(--txt);font-weight:500; }
+.info-value.income { color:var(--green);font-weight:700; }
+.no-data { color:var(--txt3);font-style:italic;font-size:12px; }
+
+.peo-group { margin-bottom:14px; }
+.peo-tag { font-family:'DM Mono',monospace;font-size:11px;color:var(--red);letter-spacing:1px;margin-bottom:8px; }
+.peo-item { display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line); }
+.peo-item:last-child { border-bottom:none; }
+.peo-num { font-family:'DM Mono',monospace;font-size:14px;color:var(--txt3);flex-shrink:0;width:20px; }
+.peo-content { flex:1;min-width:0; }
+.peo-text { font-size:12px;color:var(--txt2);line-height:1.6;margin-bottom:6px; }
+.stars { display:flex;align-items:center;gap:3px; }
+.star { width:8px;height:8px;background:var(--bg4);border-radius:1px;transition:background var(--tr); }
+.star.on { background:var(--red); }
+.star-score { font-family:'DM Mono',monospace;font-size:13px;color:var(--red);margin-left:6px; }
+
+.quote-box {
+  background:var(--bg3);border-left:2px solid var(--red);
+  border-radius:0 8px 8px 0;padding:12px 14px;
+  font-size:13px;color:var(--txt);line-height:1.7;
+  word-break:break-word;
+}
+.quote-box.empty { color:var(--txt3);font-style:italic;border-left-color:var(--line2); }
+.quote-full-text { white-space:pre-wrap;display:block; }
+.quote-preview-text { white-space:pre-wrap;display:block; }
+.btn-see-more {
+  display:inline-flex;align-items:center;gap:4px;
+  margin-top:8px;font-family:'DM Mono',monospace;
+  font-size:10px;font-weight:500;letter-spacing:0.5px;
+  text-transform:uppercase;color:var(--red);
+  background:var(--red-dim);border:1px solid var(--red-line);
+  border-radius:6px;cursor:pointer;padding:5px 10px;
+  transition:all 0.2s;
+}
+.btn-see-more:active { background:var(--red);color:#fff; }
+
+/* ===== TEXT POPUP ===== */
+#textPopup {
+  position:fixed;inset:0;z-index:999999;
+  background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);
+  display:none;align-items:flex-end;justify-content:center;
+}
+#textPopup.open { display:flex; }
+.text-popup-box {
+  background:var(--bg2);width:100%;max-width:640px;
+  border-radius:18px 18px 0 0;max-height:75vh;
+  display:flex;flex-direction:column;animation:slideUp 0.25s ease both;
+}
+.text-popup-handle { width:36px;height:4px;background:var(--line2);border-radius:2px;margin:10px auto 0;flex-shrink:0; }
+.text-popup-header {
+  padding:14px 18px 12px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.text-popup-title { font-family:'DM Mono',monospace;font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--red); }
+.text-popup-alumni { font-size:13px;font-weight:700;color:var(--txt);margin-bottom:3px; }
+.text-popup-close {
+  width:28px;height:28px;background:var(--bg3);border:1px solid var(--line2);
+  border-radius:6px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:var(--txt2);
+}
+.text-popup-body { padding:16px 18px calc(20px + var(--safe-bottom));overflow-y:auto;flex:1;font-size:13px;color:var(--txt);line-height:1.8;white-space:pre-wrap;word-break:break-word; }
+
+/* ===== ERROR BOX ===== */
+.errbox {
+  margin:12px 16px;background:var(--red-dim);border:1px solid var(--red-line);
+  border-radius:8px;padding:12px 14px;color:var(--red);font-size:12px;
+  display:none;
+}
+.errbox button { background:none;border:none;color:inherit;font-weight:700;cursor:pointer;text-decoration:underline;font-family:inherit; }
+
+/* ===== EMPTY STATE ===== */
+.empty-state { text-align:center;padding:48px 16px;color:var(--txt3); }
+.empty-state svg { margin-bottom:12px; }
+.empty-state h3 { font-size:14px;font-weight:600;color:var(--txt2);margin-bottom:6px; }
+.empty-state p { font-size:12px; }
+
+/* ===== TOAST ===== */
+#toastStack { position:fixed;bottom:calc(24px + var(--safe-bottom));right:12px;left:12px;display:flex;flex-direction:column;gap:8px;z-index:999999;pointer-events:none; }
+.nt {
+  background:var(--bg2);border:1px solid var(--red-line);
+  border-radius:var(--r);padding:12px 14px 16px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);
+  display:flex;align-items:center;gap:10px;
+  pointer-events:auto;position:relative;overflow:hidden;
+  animation:ntIn 0.35s cubic-bezier(0.34,1.4,0.64,1) both;
+}
+.nt.hide { animation:ntOut 0.3s ease forwards; }
+@keyframes ntIn { from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);} }
+@keyframes ntOut { to{opacity:0;transform:translateY(20px);} }
+.nt-av { width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;color:#fff;flex-shrink:0; }
+.nt-body { flex:1;min-width:0; }
+.nt-label { font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);margin-bottom:2px; }
+.nt-name { font-size:13px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.nt-sub { font-size:10px;color:var(--txt2);margin-top:1px; }
+.nt-badge { font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--red);border:1px solid var(--red-line);padding:2px 6px;border-radius:4px;flex-shrink:0; }
+.nt-prog { position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--red);transform-origin:left;animation:nt-bar var(--dur,3s) linear forwards; }
+@keyframes nt-bar { from{transform:scaleX(1);}to{transform:scaleX(0);} }
+
+/* ===== FOOTER ===== */
+footer {
+  text-align:center;padding:20px 16px;
+  background:var(--bg2);border-top:1px solid var(--line);
+  font-family:'DM Mono',monospace;font-size:10px;
+  letter-spacing:0.5px;color:var(--txt3);
+}
+footer span { color:var(--red); }
+
+/* ===== LIGHT MODE SPECIFIC ===== */
+body.light #topbar { border-bottom-color:rgba(0,0,0,0.08); }
+body.light .modal-box { background:#fff; }
+body.light .chart-card,
+body.light .stat-card:not(.hi),
+body.light .alumni-card,
+body.light #syncBar,
+body.light .search-field { background:#fff;border-color:rgba(0,0,0,0.08); }
+body.light .info-item { background:#f5f5f8; }
+body.light .quote-box { background:#f5f5f8; }
+body.light .text-popup-box { background:#fff; }
+body.light footer { background:#ebebf0;border-top-color:rgba(0,0,0,0.08); }
+body.light .nt { background:#fff; }
+
+/* ===== SECTION GRID TITLE ===== */
+.grid-title {
+  padding:0 16px 10px;
+  font-size:18px;font-weight:700;letter-spacing:-0.3px;color:var(--txt);
+}
+.grid-title span { color:var(--red); }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<nav id="topbar">
+  <div class="tb-brand">
+    <div class="tb-dot"></div>
+    <div class="tb-title">Alumni DCD</div>
+  </div>
+  <div class="tb-right">
+    <a class="desktop-btn" href="https://kpmimsys.github.io/surveydcd/" target="_blank" title="Buka versi desktop">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      Desktop
+    </a>
+    <div class="mode-btn" onclick="toggleMode()" id="modeBtn" title="Tukar tema">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" id="modeIcon">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </div>
+    <button class="sync-btn" id="rfBtn" onclick="loadData()">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      Refresh
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-noise"></div>
+  <div class="hero-tag">Sistem Pemantauan Aktif</div>
+  <div class="hero-h1">ALUMNI<br><em>DCD</em></div>
+  <p class="hero-meta">Data tinjauan Program Diploma in Creative Digital Media Production dikemaskini setiap 60 saat.</p>
+  <div class="hero-status" id="heroStatus">
+    <div class="spin-sm"></div>
+    <span>Memuatkan data…</span>
+  </div>
+</section>
+
+<!-- SYNC BAR -->
+<div id="syncBar" style="position:relative;">
+  <div class="sb-left">
+    <div class="sb-dot" id="cdDot"></div>
+    <span class="sb-txt" id="cdText">Auto-sync aktif · <span class="sb-num" id="cdNum">60</span>s</span>
+  </div>
+  <div class="sb-actions">
+    <button class="sb-btn" onclick="triggerSync()">↻ Sync</button>
+    <button class="sb-btn" id="btnStopResume" onclick="toggleAutoRefresh()">⏹ Stop</button>
+  </div>
+  <div class="sb-progress">
+    <div class="sb-fill" id="cdProgressFill" style="width:100%;"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div class="errbox" id="errBox">
+    ⚠ <strong>Gagal memuatkan data.</strong> <span id="errMsg"></span>
+    <button onclick="triggerSync()">Cuba Semula</button>
+  </div>
+
+  <div id="dash" style="opacity:0;transition:opacity 0.4s;">
+
+    <!-- STATS -->
+    <div class="sec-hd"><span class="sec-num">01</span><span class="sec-title">Ringkasan</span></div>
+    <div class="stats-wrap">
+      <div class="stats-grid">
+        <div class="stat-card hi">
+          <div><span class="s-icon">🎓</span></div>
+          <div class="s-corner"></div>
+          <div>
+            <div class="s-label">Jumlah Alumni</div>
+            <div class="s-val" id="sTotal">0</div>
+            <div class="s-sub">Responden Tinjauan</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="s-corner"></div>
+          <span class="s-icon">💼</span>
+          <div class="s-label">Bekerja</div>
+          <div class="s-val" id="sEmp">0</div>
+          <div class="s-sub" id="sEmpPct">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-corner"></div>
+          <span class="s-icon">📚</span>
+          <div class="s-label">Pengajian</div>
+          <div class="s-val" id="sCont">0</div>
+          <div class="s-sub" id="sContPct">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="s-corner"></div>
+          <span class="s-icon">🔍</span>
+          <div class="s-label">Tidak Bekerja</div>
+          <div class="s-val" id="sUnemp">0</div>
+          <div class="s-sub" id="sUnempPct">—</div>
+        </div>
+        <div class="stat-card" style="display:none;">
+          <div class="s-corner"></div>
+          <span class="s-icon">⭐</span>
+          <div class="s-label">Skor PEO</div>
+          <div class="s-val" id="sPeo">—</div>
+          <div class="s-sub">Skala 1–5</div>
+        </div>
+        <div class="stat-card" style="display:none;">
+          <div class="s-corner"></div>
+          <span class="s-icon">📅</span>
+          <div class="s-label">Kohort</div>
+          <div class="s-val" id="sCoh">0</div>
+          <div class="s-sub">Tahun Grad</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="sec-hd" style="margin-top:12px;"><span class="sec-num">02</span><span class="sec-title">Taburan</span></div>
+    <div class="charts-wrap">
+      <div class="chart-card">
+        <div class="chart-hd">
+          <div class="chart-hd-bar"></div>
+          <div class="chart-hd-title">Mengikut Tahun</div>
+        </div>
+        <div id="yrChart"></div>
+      </div>
+      <div class="chart-card" style="display:none;">
+        <div class="chart-hd">
+          <div class="chart-hd-bar"></div>
+          <div class="chart-hd-title">Status Pekerjaan</div>
+        </div>
+        <div class="status-list" id="statusChart"></div>
+      </div>
+    </div>
+
+    <!-- ALUMNI LIST -->
+    <div class="sec-hd" style="margin-top:12px;"><span class="sec-num">03</span><span class="sec-title">Senarai Alumni</span></div>
+
+    <div class="tabs-wrap" id="yrTabs"></div>
+
+    <div class="search-wrap">
+      <div class="search-field">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="srch" placeholder="Cari nama, jawatan, syarikat…" oninput="onSearch()">
+      </div>
+      <button class="btn-reset" id="btnReset" onclick="resetSearch()" style="display:none;">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        Reset
+      </button>
+    </div>
+
+    <div class="grid-title" id="gtitle">Semua <span>Alumni</span></div>
+    <div class="rec-count" id="rc"></div>
+
+    <div class="cards-list" id="ag"></div>
+
+  </div>
+</div>
+
+<footer>
+  &copy; Program DCD &nbsp;·&nbsp; Sumber: <span>Google Sheets</span>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="mo" onclick="closeModal(event)">
+  <div class="modal-box" id="md">
+    <div class="modal-handle"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toastStack"></div>
+
+<!-- TEXT POPUP -->
+<div id="textPopup" onclick="if(event.target===this)closeTextPopup()">
+  <div class="text-popup-box">
+    <div class="text-popup-handle"></div>
+    <div class="text-popup-header">
+      <div>
+        <div class="text-popup-alumni" id="textPopupAlumni"></div>
+        <div class="text-popup-title" id="textPopupTitle">—</div>
+      </div>
+      <button class="text-popup-close" onclick="closeTextPopup()">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="text-popup-body" id="textPopupBody"></div>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const SHEET_ID = '1sZVbuTl5JVhaeG5mzVKllPuT8ena9JbDdYsFBEAJPOo';
+const AUTO_REFRESH_SEC = 60;
+
+const YEAR_SHEETS = [
+  { year: '2019', gid: '793446121'  },
+  { year: '2020', gid: '1164928072' },
+  { year: '2021', gid: '375401519'  },
+  { year: '2022', gid: '34984858'   },
+  { year: '2023', gid: '2121668525' },
+];
+
+const PEO_GROUPS = [
+  {tag:'PEO 1', qs:[
+    {n:1,text:'Saya mengaplikasikan teori dan prinsip pengeluaran media kreatif secara berkesan dalam tugasan harian.'},
+    {n:2,text:'Saya cekap mengendalikan peralatan teknikal (seperti kamera, pencahayaan, audio) mengikut standard industri terkini.'},
+    {n:3,text:'Saya mahir menggunakan perisian industri (contoh: Adobe Creative Cloud, DaVinci Resolve) untuk menghasilkan karya digital yang berkualiti.'},
+  ]},
+  {tag:'PEO 2', qs:[
+    {n:4,text:'Saya mampu berkomunikasi secara berkesan dan membentangkan idea atau storyboard dengan jelas kepada klien atau rakan sekerja.'},
+    {n:5,text:'Saya boleh bekerja secara harmoni dan produktif di dalam sesebuah kru produksi atau pasukan pelbagai disiplin.'},
+    {n:6,text:'Saya pernah mengambil tanggungjawab kepimpinan (contoh: mengarahkan pengambaran atau mengetuai projek rekaan) di tempat kerja.'},
+    {n:7,text:'Saya sentiasa mematuhi etika profesional industri kreatif, termasuk menghormati hak cipta (copyright) dan sensitiviti kandungan.'},
+  ]},
+  {tag:'PEO 3', qs:[
+    {n:8,text:'Saya sentiasa peka dan mampu mengadaptasi teknologi digital baharu (contoh: peralatan terkini, AI dalam media) untuk menyelesaikan masalah produksi.'},
+    {n:9,text:'Saya menggunakan kemahiran numerasi secara efektif dalam menguruskan projek (contoh: mengira bajet produksi, menyusun jadual pengambaran).'},
+    {n:10,text:'Saya berupaya menganalisis masalah teknikal di set pengambaran atau semasa pasca-produksi dan mencari jalan penyelesaian.'},
+  ]},
+  {tag:'PEO 4', qs:[
+    {n:11,text:'Saya mempunyai inisiatif untuk meningkatkan kemahiran diri melalui kursus pendek, bengkel, atau persijilan profesional secara berterusan.'},
+    {n:12,text:'Saya berani meneroka peluang perniagaan atau menawarkan perkhidmatan kreatif secara bebas (freelance / gig economy).'},
+    {n:13,text:'Saya mempunyai perancangan kerjaya yang jelas, termasuk hasrat untuk menyambung pengajian ke peringkat Ijazah.'},
+  ]},
+];
+
+let allData = [], activeYear = 'Semua';
+let autoTimer = null, cdTimer = null, cdLeft = AUTO_REFRESH_SEC, lastSync = null, isSyncing = false;
+let autoRefreshEnabled = true;
+
+// ===== NAVBAR SCROLL =====
+window.addEventListener('scroll', () => {
+  document.getElementById('topbar').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// ===== AVATAR =====
+const GRADS = [
+  'linear-gradient(135deg,#c0392b,#e74c3c)',
+  'linear-gradient(135deg,#1a1a2e,#16213e)',
+  'linear-gradient(135deg,#2c1810,#8b3a3a)',
+  'linear-gradient(135deg,#0d0d0d,#3d3d3d)',
+  'linear-gradient(135deg,#1b1b2f,#e43f5a)',
+  'linear-gradient(135deg,#162447,#1f4068)',
+  'linear-gradient(135deg,#3b1f2b,#aa2b48)',
+];
+function grad(n) { let s=0; for(const c of n) s+=c.charCodeAt(0); return GRADS[s%GRADS.length]; }
+function ini(n) { return n.split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?'; }
+
+// ===== CSV PARSER =====
+function parseCSV(txt) {
+  txt = txt.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  const rows=[]; let row=[],cell='',inQ=false,i=0;
+  while(i<txt.length){
+    const c=txt[i];
+    if(c==='"'){if(inQ&&txt[i+1]==='"'){cell+='"';i+=2;continue;}inQ=!inQ;i++;continue;}
+    if(c===','&&!inQ){row.push(cell.trim());cell='';i++;continue;}
+    if(c==='\n'&&!inQ){row.push(cell.trim());if(row.some(v=>v!==''))rows.push(row);row=[];cell='';i++;continue;}
+    cell+=c;i++;
+  }
+  row.push(cell.trim());if(row.some(v=>v!==''))rows.push(row);
+  return rows;
+}
+
+function parseRow(r, yearOverride, id) {
+  function col(i){return(r[i]||'').trim();}
+  return {
+    id, nama:col(0)||'—', tahun:yearOverride, status:col(2)||'—',
+    jawatan:col(3)||'—', majikan:col(4)||'—', pendapatan:col(5),
+    peo:[6,7,8,9,10,11,12,13,14,15,16,17,18].map((ci,j)=>{
+      const val=parseInt(r[ci]);
+      return{n:j+1,val:(isNaN(val)||val<1||val>5)?0:val};
+    }),
+    cadangan:col(19), pencapaian:col(20),
+  };
+}
+
+function formatPendapatan(raw) {
+  if(!raw||!raw.trim()||raw==='—'||raw==='-') return null;
+  const v=raw.trim().toLowerCase().replace(/\s+/g,' ');
+  if(!v||v==='-'||v==='tiada'||v==='n/a'||v==='tidak berkaitan'||v==='tidak bekerja') return null;
+  if(/^rm[\d,]/.test(v)) return raw.trim();
+  if(v.includes('ke atas')||v.includes('keatas')||v.includes('4000')||v.includes('4,000')) return 'RM4,000 ke atas';
+  if(v.includes('rm4')) return 'RM4,000 ke atas';
+  if(v.includes('3000')||v.includes('3,000')||v.includes('rm3')) return 'RM3,000 – RM3,999';
+  if(v.includes('2000')||v.includes('2,000')||v.includes('rm2')) return 'RM2,000 – RM2,999';
+  if(v.includes('kurang')||v.includes('bawah')||v.includes('1000')||v.includes('rm1')) return '< RM2,000';
+  if(/rm|\d{3,}/.test(v)) return raw.trim();
+  return null;
+}
+
+// ===== COUNTDOWN =====
+function startCountdown() {
+  if(cdTimer) clearInterval(cdTimer);
+  cdLeft=AUTO_REFRESH_SEC; updateProgress();
+  cdTimer=setInterval(()=>{
+    cdLeft=Math.max(0,cdLeft-1);
+    const el=document.getElementById('cdNum');
+    if(el) el.textContent=cdLeft+'s';
+    updateProgress();
+    if(cdLeft<=0) clearInterval(cdTimer);
+  },1000);
+}
+function updateProgress() {
+  const el=document.getElementById('cdProgressFill');
+  if(el) el.style.width=((cdLeft/AUTO_REFRESH_SEC)*100)+'%';
+}
+function scheduleAutoRefresh() {
+  if(autoTimer) clearInterval(autoTimer);
+  if(!autoRefreshEnabled) return;
+  autoTimer=setInterval(()=>{triggerSync();},AUTO_REFRESH_SEC*1000);
+  startCountdown();
+}
+function toggleAutoRefresh() {
+  autoRefreshEnabled=!autoRefreshEnabled;
+  const btn=document.getElementById('btnStopResume');
+  if(!autoRefreshEnabled){
+    if(autoTimer) clearInterval(autoTimer);
+    if(cdTimer) clearInterval(cdTimer);
+    const cdText=document.getElementById('cdText');
+    if(cdText) cdText.innerHTML='Auto-refresh <span style="color:var(--red);font-weight:700;">BERHENTI</span>';
+    const fill=document.getElementById('cdProgressFill');
+    if(fill) fill.style.width='0%';
+    const dot=document.getElementById('cdDot');
+    if(dot){dot.className='sb-dot';dot.style.background='#555';dot.style.animation='none';}
+    if(btn) btn.textContent='▶ Resume';
+  } else {
+    if(btn) btn.textContent='⏹ Stop';
+    const dot=document.getElementById('cdDot');
+    if(dot){dot.style.background='';dot.style.animation='';}
+    scheduleAutoRefresh(); setCdStatus('ok');
+  }
+}
+function triggerSync() {
+  if(isSyncing) return;
+  clearInterval(autoTimer); clearInterval(cdTimer);
+  loadData(true);
+}
+function setCdStatus(state, msg) {
+  const dot=document.getElementById('cdDot');
+  const txt=document.getElementById('cdText');
+  if(!dot||!txt) return;
+  dot.className='sb-dot';
+  if(state==='syncing'){
+    dot.classList.add('syncing');
+    txt.innerHTML=`<span style="color:var(--red)">${msg||'Sedang sync…'}</span>`;
+  } else if(state==='ok'){
+    const ls=document.getElementById('cdLastSync');
+    if(lastSync&&ls){ls.style.display='';ls.textContent='Terakhir: '+lastSync.toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'});}
+    txt.innerHTML=`Seterusnya: <span class="sb-num" id="cdNum">${cdLeft}s</span>`;
+  } else if(state==='err'){
+    dot.classList.add('err');
+    txt.innerHTML=`<span style="color:var(--red)">⚠ Gagal sync</span>`;
+  }
+}
+function setHeroStatus(state,count) {
+  const el=document.getElementById('heroStatus');
+  if(!el) return;
+  el.className='hero-status';
+  if(state==='ok'){
+    el.classList.add('ok');
+    el.innerHTML=`<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> ${count} data terkini`;
+  } else if(state==='err'){
+    el.classList.add('err');
+    el.innerHTML=`<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> Gagal muat data`;
+  } else {
+    el.innerHTML=`<div class="spin-sm"></div> Memuatkan data…`;
+  }
+}
+
+// ===== LOAD DATA =====
+async function loadData(isSilent=false) {
+  if(isSyncing) return;
+  isSyncing=true;
+  const btn=document.getElementById('rfBtn');
+  if(btn){btn.classList.add('loading');btn.innerHTML=`<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Muat`;}
+  if(isSilent) setCdStatus('syncing');
+  try {
+    const prevNames=new Set(allData.map(d=>d.nama));
+    const results=await Promise.all(YEAR_SHEETS.map(async({year,gid})=>{
+      const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}&cachebust=${Date.now()}`;
+      const res=await fetch(url,{cache:'no-store'});
+      if(!res.ok) throw new Error(`HTTP ${res.status} sheet ${year}`);
+      const txt=await res.text();
+      if(!txt||txt.trim().startsWith('<!')) throw new Error(`Sheet ${year} tidak dapat diakses`);
+      const rows=parseCSV(txt);
+      return rows.slice(1).filter(r=>{const nm=(r[0]||'').trim();return nm&&nm!=='Nama Penuh'&&nm!=='1. Nama Penuh';}).map((r,i)=>parseRow(r,year,`${year}_${i}`));
+    }));
+    const newData=results.flat().filter(d=>d.nama&&d.nama!=='—');
+    if(newData.length===0) throw new Error('Tiada data ditemui.');
+    allData=newData;
+    const validYears=[...new Set(allData.map(d=>d.tahun).filter(y=>y&&y!=='—'))];
+    if(activeYear!=='Semua'&&!validYears.includes(activeYear)) activeYear='Semua';
+    buildStats(); buildChart(); buildStatusChart(); buildTabs(); renderCards();
+    const dash=document.getElementById('dash');
+    if(dash){dash.style.opacity='0';requestAnimationFrame(()=>{dash.style.opacity='1';});}
+    document.getElementById('errBox').style.display='none';
+    lastSync=new Date();
+    if(isSilent&&allData.length!==allData.length){
+      const newEntries=allData.filter(d=>!prevNames.has(d.nama));
+      if(newEntries.length>0) showNewDataToast(newEntries);
+    }
+    setCdStatus('ok'); setHeroStatus('ok',allData.length);
+  } catch(e) {
+    document.getElementById('errBox').style.display='block';
+    document.getElementById('errMsg').textContent=' '+e.message;
+    setCdStatus('err'); setHeroStatus('err');
+  } finally {
+    if(btn){btn.classList.remove('loading');btn.innerHTML=`<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Refresh`;}
+    isSyncing=false; scheduleAutoRefresh();
+  }
+}
+
+// ===== STATS =====
+function buildStats() {
+  const n=allData.length;
+  document.getElementById('sTotal').textContent=n;
+  const emp=allData.filter(d=>{const s=d.status.toLowerCase();if(s.includes('tidak bekerja')) return false;return s.includes('bekerja')||s.includes('kerja')||s.includes('freelance')||s.includes('swasta')||s.includes('kerajaan')||s.includes('employed');}).length;
+  document.getElementById('sEmp').textContent=emp;
+  document.getElementById('sEmpPct').textContent=n?Math.round(emp/n*100)+'%':'—';
+  const cont=allData.filter(d=>{const s=d.status.toLowerCase();return s.includes('sambung')||s.includes('belajar')||s.includes('pengajian')||s.includes('degree')||s.includes('ijazah')||s.includes('universiti')||s.includes('kolej')||s.includes('pelajar')||s.includes('student');}).length;
+  document.getElementById('sCont').textContent=cont;
+  document.getElementById('sContPct').textContent=n?Math.round(cont/n*100)+'%':'—';
+  const unemp=allData.filter(d=>{const s=d.status.toLowerCase().trim();return s==='tidak bekerja'||s.startsWith('tidak bekerja');}).length;
+  document.getElementById('sUnemp').textContent=unemp;
+  document.getElementById('sUnempPct').textContent=n?Math.round(unemp/n*100)+'%':'—';
+  const vals=allData.flatMap(d=>d.peo.map(p=>p.val).filter(v=>v>0));
+  document.getElementById('sPeo').textContent=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2):'—';
+  const yrs=[...new Set(allData.map(d=>d.tahun).filter(y=>y&&y!=='—'))];
+  document.getElementById('sCoh').textContent=yrs.length;
+}
+
+// ===== CHARTS =====
+function buildChart() {
+  const cnt={};
+  allData.forEach(d=>{cnt[d.tahun]=(cnt[d.tahun]||0)+1;});
+  const s=Object.entries(cnt).filter(([k])=>k&&k!=='—').sort((a,b)=>a[0].localeCompare(b[0]));
+  const mx=Math.max(...s.map(e=>e[1]),1);
+  document.getElementById('yrChart').innerHTML=s.map(([k,v])=>
+    `<div class="bar-item"><div class="bar-label">${k}</div><div class="bar-track"><div class="bar-fill" style="width:${(v/mx*100).toFixed(1)}%"></div></div><div class="bar-count">${v}</div></div>`
+  ).join('')||'<div style="color:var(--txt3);font-size:12px;padding:8px 0;">Tiada data</div>';
+}
+function buildStatusChart() {
+  const cnt={};
+  allData.forEach(d=>{const s=d.status||'—';cnt[s]=(cnt[s]||0)+1;});
+  const sorted=Object.entries(cnt).filter(([k])=>k&&k!=='—').sort((a,b)=>b[1]-a[1]);
+  const mx=Math.max(...sorted.map(e=>e[1]),1);
+  const colors=['#e8192c','#ff6b7a','#ff9aa5','#ffbfc6','#ffd9dd'];
+  document.getElementById('statusChart').innerHTML=sorted.map(([k,v],i)=>
+    `<div class="status-row">
+      <div class="status-name" title="${k}">${k}</div>
+      <div class="status-bar-wrap"><div class="status-bar-track"><div class="status-bar-fill" style="width:${(v/mx*100).toFixed(1)}%;background:${colors[i]||colors[colors.length-1]}"></div></div></div>
+      <div class="status-cnt">${v}</div>
+    </div>`
+  ).join('')||'<div style="color:var(--txt3);font-size:12px;">Tiada data</div>';
+}
+
+// ===== TABS =====
+function buildTabs() {
+  const cnt={};allData.forEach(d=>{cnt[d.tahun]=(cnt[d.tahun]||0)+1;});
+  const yrs=[...new Set(allData.map(d=>d.tahun).filter(y=>y&&y!=='—'))].sort();
+  document.getElementById('yrTabs').innerHTML=['Semua',...yrs].map(y=>{
+    const c=y==='Semua'?allData.length:(cnt[y]||0);
+    return `<button class="ytab ${y===activeYear?'active':''}" onclick="setYear('${y}')"><span>${y}</span><span class="tab-count">${c}</span></button>`;
+  }).join('');
+}
+function setYear(y){activeYear=y;buildTabs();renderCards();}
+function onSearch(){
+  const val=document.getElementById('srch').value;
+  document.getElementById('btnReset').style.display=val?'flex':'none';
+  renderCards();
+}
+function resetSearch(){
+  document.getElementById('srch').value='';
+  document.getElementById('btnReset').style.display='none';
+  renderCards();
+}
+
+// ===== RENDER CARDS =====
+function peoAvg(p){const v=p.map(x=>x.val).filter(x=>x>0);return v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2):null;}
+function renderCards() {
+  const q=document.getElementById('srch').value.toLowerCase().trim();
+  const list=allData.filter(d=>{
+    const yr=activeYear==='Semua'||d.tahun===activeYear;
+    const sr=!q||d.nama.toLowerCase().includes(q)||d.jawatan.toLowerCase().includes(q)||d.majikan.toLowerCase().includes(q)||d.status.toLowerCase().includes(q);
+    return yr&&sr;
+  });
+  const gtitle=document.getElementById('gtitle');
+  gtitle.innerHTML=activeYear==='Semua'?'Semua <span>Alumni</span>':`Alumni <span>${activeYear}</span>`;
+  document.getElementById('rc').textContent=`${list.length} rekod`;
+  if(!list.length){
+    document.getElementById('ag').innerHTML=`<div class="empty-state"><svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="color:var(--txt3)"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><h3>Tiada rekod</h3><p>Cuba tukar penapis atau kata carian.</p></div>`;
+    return;
+  }
+  document.getElementById('ag').innerHTML=list.map((d,i)=>{
+    const av=peoAvg(d.peo);
+    const g=grad(d.nama),in2=ini(d.nama);
+    const pendapatan=formatPendapatan(d.pendapatan);
+    const incomeHtml=pendapatan?`<span class="card-val income">${pendapatan}</span>`:`<span class="card-val no-income">Tiada</span>`;
+    return `<div class="alumni-card" style="animation-delay:${Math.min(i*0.03,0.4)}s" onclick="openModal('${d.id}')">
+      <div class="card-top">
+        <div class="card-av" style="background:${g}">${in2}</div>
+        <div class="card-info">
+          <div class="card-name">${d.nama}</div>
+          <div class="card-job">${d.jawatan!=='—'?d.jawatan:'Tidak dinyatakan'}${d.majikan!=='—'?' · '+d.majikan:''}</div>
+        </div>
+        <div class="card-yr">${d.tahun}</div>
+      </div>
+      <div class="card-mid">
+        <div class="card-field"><div class="card-key">Status</div><div class="card-val">${d.status}</div></div>
+        <div class="card-field"><div class="card-key">Pendapatan</div>${incomeHtml}</div>
+      </div>
+      <div class="card-bot">
+        <div class="peo-wrap">
+          <span class="peo-lbl">PEO</span>
+          <span class="peo-score">${av?av+'/5':'—'}</span>
+        </div>
+        <div class="card-arrow">›</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== QUOTE HELPERS =====
+const MAX_CHARS=220;
+let _popupStore={},_popupIdx=0;
+function quoteHtml(text,title,alumniName){
+  if(!text||!text.trim()) return '';
+  const safe=text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  if(text.length<=MAX_CHARS) return `<span class="quote-full-text">${safe}</span>`;
+  const key='p'+(++_popupIdx);
+  _popupStore[key]={title,text,alumniName};
+  const preview=safe.slice(0,MAX_CHARS)+'…';
+  return `<span class="quote-preview-text">${preview}</span><button class="btn-see-more" onclick="event.stopPropagation();openTextPopup('${key}')">Baca penuh →</button>`;
+}
+function openTextPopup(key){
+  const d=_popupStore[key];if(!d) return;
+  document.getElementById('textPopupTitle').textContent=d.title;
+  document.getElementById('textPopupAlumni').textContent=d.alumniName||'';
+  document.getElementById('textPopupBody').textContent=d.text;
+  document.getElementById('textPopup').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeTextPopup(){
+  document.getElementById('textPopup').classList.remove('open');
+  if(!document.getElementById('mo').classList.contains('open')) document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(document.getElementById('textPopup').classList.contains('open')) closeTextPopup();
+    else{document.getElementById('mo').classList.remove('open');document.body.style.overflow='';}
+  }
+});
+
+// ===== MODAL =====
+function openModal(id){
+  const d=allData.find(x=>x.id==id);if(!d) return;
+  _popupStore={};_popupIdx=0;
+  const g=grad(d.nama),in2=ini(d.nama),av=peoAvg(d.peo);
+  const pendapatan=formatPendapatan(d.pendapatan);
+  const peoHtml=PEO_GROUPS.map(grp=>`
+    <div class="peo-group">
+      <div class="peo-tag">${grp.tag}</div>
+      ${grp.qs.map(q=>{
+        const v=d.peo.find(p=>p.n===q.n)?.val||0;
+        const stars=[1,2,3,4,5].map(s=>`<div class="star ${s<=v?'on':''}"></div>`).join('');
+        return `<div class="peo-item">
+          <div class="peo-num">${q.n}</div>
+          <div class="peo-content">
+            <div class="peo-text">${q.text}</div>
+            <div class="stars">${stars}<span class="star-score">${v||'—'}</span></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+  const box=document.getElementById('md');
+  box.innerHTML=`
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-av" style="background:${g}">${in2}</div>
+      <div class="modal-info">
+        <div class="modal-name">${d.nama}</div>
+        <div class="modal-sub">Graduan ${d.tahun}${av?'  ·  PEO: '+av+'/5':''}</div>
+      </div>
+      <div class="modal-close" onclick="document.getElementById('mo').classList.remove('open');document.body.style.overflow='';">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">Maklumat Kerjaya</div>
+        <div class="info-grid">
+          <div class="info-item"><div class="info-label">Tahun Graduasi</div><div class="info-value">${d.tahun!=='—'?d.tahun:'<span class="no-data">Tiada</span>'}</div></div>
+          <div class="info-item"><div class="info-label">Status</div><div class="info-value">${d.status!=='—'?d.status:'<span class="no-data">Tiada</span>'}</div></div>
+          <div class="info-item"><div class="info-label">Jawatan</div><div class="info-value">${d.jawatan!=='—'?d.jawatan:'<span class="no-data">—</span>'}</div></div>
+          <div class="info-item"><div class="info-label">Majikan</div><div class="info-value">${d.majikan!=='—'?d.majikan:'<span class="no-data">—</span>'}</div></div>
+          <div class="info-item full">
+            <div class="info-label">Pendapatan Bulanan</div>
+            <div class="info-value ${pendapatan?'income':'no-data'}">${pendapatan||'Tiada pendapatan dinyatakan'}</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Penilaian PEO (Skala 1–5)</div>
+        ${peoHtml}
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Cadangan Kemahiran Silibus</div>
+        <div class="quote-box ${!d.cadangan?'empty':''}">
+          ${d.cadangan?quoteHtml(d.cadangan,'Cadangan Kemahiran untuk Silibus',d.nama):'Tiada maklum balas.'}
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Pencapaian Profesional</div>
+        <div class="quote-box ${!d.pencapaian?'empty':''}">
+          ${d.pencapaian?quoteHtml(d.pencapaian,'Pencapaian Profesional',d.nama):'Tiada maklum balas.'}
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('mo').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('mo')) return;
+  document.getElementById('mo').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ===== TOAST =====
+function showNewDataToast(newEntries){
+  const stack=document.getElementById('toastStack');
+  const SHOW_MS=3200,FADE_MS=400,STAGGER=420;
+  newEntries.forEach((d,i)=>{
+    setTimeout(()=>{
+      const g=grad(d.nama),in2=ini(d.nama);
+      const el=document.createElement('div');
+      el.className='nt';
+      el.innerHTML=`<div class="nt-av" style="background:${g}">${in2}</div><div class="nt-body"><div class="nt-label">Alumni baru</div><div class="nt-name">${d.nama}</div><div class="nt-sub">${d.tahun} · ${d.status}</div></div><div class="nt-badge">BARU</div><div class="nt-prog" style="--dur:${SHOW_MS/1000}s"></div>`;
+      stack.appendChild(el);
+      setTimeout(()=>{el.classList.add('hide');setTimeout(()=>el.remove(),FADE_MS);},SHOW_MS);
+    },i*STAGGER);
+  });
+}
+
+// ===== THEME =====
+let manualMode=null;
+function applyTimeMode(){
+  if(manualMode!==null){
+    document.body.classList.toggle('light',manualMode==='day');
+    updateModeIcon(manualMode==='day');
+    return;
+  }
+  const now=new Date();
+  const mins=now.getHours()*60+now.getMinutes();
+  const isDay=mins>=420&&mins<1200;
+  document.body.classList.toggle('light',isDay);
+  updateModeIcon(isDay);
+}
+function updateModeIcon(isDay){
+  const icon=document.getElementById('modeIcon');
+  if(!icon) return;
+  if(isDay){
+    icon.innerHTML='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+    icon.setAttribute('fill','none');icon.setAttribute('stroke','currentColor');icon.setAttribute('stroke-width','2');icon.setAttribute('stroke-linecap','round');
+  } else {
+    icon.innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    icon.setAttribute('fill','currentColor');icon.removeAttribute('stroke');
+  }
+}
+function toggleMode(){
+  const isCurrentlyDay=document.body.classList.contains('light');
+  manualMode=isCurrentlyDay?'night':'day';
+  applyTimeMode();
+}
+applyTimeMode();
+setInterval(applyTimeMode,60000);
+
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded',()=>{loadData(false);});
+</script>
+</body>
+</html>
